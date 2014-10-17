@@ -2,15 +2,6 @@ package ua_parser;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
-
-import org.apache.commons.collections.map.LRUMap;
-
-import ua_parser.Client;
-import ua_parser.Device;
-import ua_parser.OS;
-import ua_parser.Parser;
-import ua_parser.UserAgent;
 
 /**
  * When doing webanalytics (with for example PIG) the main pattern is to process
@@ -30,10 +21,10 @@ public class CachingParser extends Parser {
   // TODO: Make configurable
   private static final int       CACHE_SIZE     = 1000;
 
-  private Map<String, Client>    cacheClient    = null;
-  private Map<String, UserAgent> cacheUserAgent = null;
-  private Map<String, Device>    cacheDevice    = null;
-  private Map<String, OS>        cacheOS        = null;
+  private LruCache<String, Client>    cacheClient    = null;
+  private LruCache<String, UserAgent> cacheUserAgent = null;
+  private LruCache<String, Device>    cacheDevice    = null;
+  private LruCache<String, OS>        cacheOS        = null;
 
   // ------------------------------------------
 
@@ -47,14 +38,14 @@ public class CachingParser extends Parser {
 
   // ------------------------------------------
 
-  @SuppressWarnings("unchecked")
   @Override
   public Client parse(String agentString) {
     if (agentString == null) {
       return null;
     }
     if (cacheClient == null) {
-      cacheClient = new LRUMap(CACHE_SIZE);
+      cacheClient = new LruCache<String, Client>(CACHE_SIZE);
+      //cacheClient = new LRUMap(CACHE_SIZE);
     }
     Client client = cacheClient.get(agentString);
     if (client != null) {
@@ -67,14 +58,13 @@ public class CachingParser extends Parser {
 
   // ------------------------------------------
 
-  @SuppressWarnings("unchecked")
   @Override
   public UserAgent parseUserAgent(String agentString) {
     if (agentString == null) {
       return null;
     }
     if (cacheUserAgent == null) {
-      cacheUserAgent = new LRUMap(CACHE_SIZE);
+      cacheUserAgent = new LruCache<String, UserAgent>(CACHE_SIZE);
     }
     UserAgent userAgent = cacheUserAgent.get(agentString);
     if (userAgent != null) {
@@ -87,14 +77,13 @@ public class CachingParser extends Parser {
 
   // ------------------------------------------
 
-  @SuppressWarnings("unchecked")
   @Override
   public Device parseDevice(String agentString) {
     if (agentString == null) {
       return null;
     }
     if (cacheDevice == null) {
-      cacheDevice = new LRUMap(CACHE_SIZE);
+      cacheDevice = new LruCache<String, Device>(CACHE_SIZE);
     }
     Device device = cacheDevice.get(agentString);
     if (device != null) {
@@ -107,7 +96,6 @@ public class CachingParser extends Parser {
 
   // ------------------------------------------
 
-  @SuppressWarnings("unchecked")
   @Override
   public OS parseOS(String agentString) {
     if (agentString == null) {
@@ -115,7 +103,7 @@ public class CachingParser extends Parser {
     }
 
     if (cacheOS == null) {
-      cacheOS = new LRUMap(CACHE_SIZE);
+      cacheOS = new LruCache<String, OS>(CACHE_SIZE);
     }
     OS os = cacheOS.get(agentString);
     if (os != null) {
